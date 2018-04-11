@@ -13,35 +13,39 @@ int main()
 	int repeatnum;
 	int clusternum;
 	int pointnum;
-	string str;
+	string str1;
+	string str2;
 	int space;
-	
+	int n;
+
 	cout<<"start";
 	cin >> testnum;
-
+	cout << testnum;
+	cout << "\n";
 	for(i=0; i<testnum; i++)
 	{	
+		cout<<"repeat";
 		cin >> repeatnum;
+		cout<<repeatnum;
 		cin >> clusternum;
+		cout<<clusternum;
 		cin >> pointnum;
-		vector< vector<double> > V(pointnum);
-		vector<double> tmp;
-		for(i=0; i<pointnum; i++)
+		cout<<pointnum<<' ';
+		vector< vector<double> > V;
+		for(int j=0; j<pointnum; j++)
 		{
-			cout<<"a";
-			cin.clear();
-			getline(cin, str);
-			//space = str.find(" ");
-			space=1;
-			cout<<"b";
-			cout<<str.length();
-			tmp.push_back(atof(str.substr(0, space).c_str()));
-			tmp.push_back(atof(str.substr(space, str.size()-space-1).c_str()));
-			cout<<"c";
+			cin>>str1;
+			cin>>str2;
+			vector<double> tmp;
+			tmp.push_back(atof(str1.c_str()));
+			tmp.push_back(atof(str2.c_str()));
 			V.push_back(tmp);
-			for(int i=0; i<V.size(); ++i)
-				  cout << V[i][0] << ' ';
-				  cout << V[i][1] << ' ';
 		}
+		for(int k=0; k<V.size(); ++k)
+		{
+			cout<<V[k][0]<< ' ';
+			cout<<V[k][1]<< ' ';
+		}
+		cout<<"\n";
 	}
 }
