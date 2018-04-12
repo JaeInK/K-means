@@ -9,20 +9,17 @@ int main()
 {
 	//read input		
 	int testnum;
-	int i;
 	int repeatnum;
 	int clusternum;
 	int pointnum;
 	string str1;
 	string str2;
-	int space;
-	int n;
 
 	cout<<"start";
 	cin >> testnum;
 	cout << testnum;
 	cout << "\n";
-	for(i=0; i<testnum; i++)
+	for(int i=0; i<testnum; i++)
 	{	
 		cout<<"repeat";
 		cin >> repeatnum;
@@ -41,6 +38,9 @@ int main()
 			tmp.push_back(atof(str2.c_str()));
 			V.push_back(tmp);
 		}
+
+		//K-Means-Clustering
+
 		for(int k=0; k<V.size(); ++k)
 		{
 			cout<<V[k][0]<< ' ';
