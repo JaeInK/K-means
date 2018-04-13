@@ -65,17 +65,8 @@ int main()
 			}
 		
 			//Setting Cluster for each points / Multithread
-			pthread_t thread;
-			int thr_id;
-			int status;
-			thr_id = pthread_create(&thread, NULL, calDistance, &V);
-    		if (thr_id < 0)
-    		{
-        		perror("thread create error : ");
-        		exit(0);
-    		}	
-			pthread_join(thread, (void **)&status);
-
+			calDistance(&V);
+		
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
 			{
