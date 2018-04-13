@@ -7,6 +7,11 @@
 
 using namespace std;
 
+vector< vector<double> > V;
+vector< vector<double> > center;
+vector<int> clus;
+void calDistance(vector< vector<double> > &data);
+
 int main()
 {
 	//read input		
@@ -31,21 +36,20 @@ int main()
 		cout<<clusternum;
 		cin >> pointnum;
 		cout<<pointnum<<' ';
-		vector< vector<double> > V;
 		vector<double> tmp;
+
 		for(int j=0; j<pointnum; j++)
 		{
 			cin>>str1;
 			cin>>str2;
 			tmp.push_back(atof(str1.c_str()));
 			tmp.push_back(atof(str2.c_str()));
+			clus.push_back(0);
 			V.push_back(tmp);
 			tmp.clear();
 		}
 
 		//K-Means-Clustering
-		vector< vector<double> > center;
-		int clus[pointnum];
 		for(int k=0; k<repeatnum; k++)
 		{
 			if(k==0)
@@ -60,21 +64,7 @@ int main()
 			}
 		
 			//Setting Cluster for each points
-			for(int i=0; i<V.size(); i++)
-			{
-				double point[2] = {V[i][0], V[i][1]};
-				double min = pow(point[0]-center[0][0], 2) + pow(point[1]-center[0][1], 2);
-				clus[i]=0;
-				for(int j=1; j<center.size(); j++)
-				{
-					double distance = pow(point[0]-center[j][0], 2) + pow(point[1]-center[j][1], 2);
-					if(distance < min)
-					{
-						min = distance;
-						clus[i] = j;
-					}
-				}	
-			}
+			calDistance(V);
 
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
@@ -110,5 +100,32 @@ int main()
 			cout<<V[k][1]<< ' ';
 		}
 		cout<<"\n";
+
+		V.clear();
+		center.clear();
+		clus.clear();
 	}
 }
+
+
+void calDistance(vector< vector<double> > &data)
+{
+	for(int i=0; i<data.size(); i++)
+	{
+		double point[2] = {data[i][0], data[i][1]};
+		double min = pow(point[0]-center[0][0], 2) + pow(point[1]-center[0][1], 2);
+		clus[i]=0;
+		for(int j=1; j<center.size(); j++)
+		{
+			double distance = pow(point[0]-center[j][0], 2) + pow(point[1]-center[j][1], 2);
+			if(distance < min)
+			{
+				min = distance;
+				clus[i] = j;
+			}
+		}	
+	}
+
+}
+
+

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <cmath>
 #include <ctime>
+#include <pthread.h>
 
 using namespace std;
 
