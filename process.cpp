@@ -8,10 +8,15 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/shm.h>
 
 using namespace std;
 
 double **V;
+double *v;
 vector< vector<double> > center;
 void* fcalDistance(void *);
 void* bcalDistance(void *);
@@ -40,19 +45,59 @@ int main()
 		cout<<clusternum;
 		cin >> pointnum;
 		cout<<pointnum<<' ';
+
+		//share data
+		const int size = pointnum*3;
+		int segment_id = shmget(IPC_PRIVATE, size*sizeof(double)*100, S_IRUSR | S_IWUSR);
+		if(segment_id ==-1)
+		{
+			perror("shmget");
+			exit(1);
+		}
+		//v = (double *)shmat(segment_id, NULL, 0);
+		//V = (double **)malloc(pointnum*3*sizeof(double));
+		//int handle = shm_open("/shm", O_CREAT | O_RDWR, 0777);
+		//ftruncate(handle, pointnum*3);
+		//V = (double **)mmap(NULL, pointnum*3, PROT_READ|PROT_WRITE, MAP_SHARED, handle, 0); 
+
+		//shm_fd = shm_open(name, 
+		//V = (char **)mmap(0, pointnum*3, PROT_WRITE, MAP_SHARED, shm_fd, 0);
+		
 		V = new double*[pointnum];
 		for(int i=0; i<pointnum; i++)
 		{
-			V[i]= new double[3];
+			//V[i]= new double[3];
+			V[i] = (double *)shmat(segment_id, NULL, 0);
 		}
 
 		for(int j=0; j<pointnum; j++)
 		{
 			cin>>str1;
 			cin>>str2;
-			V[j][0] = atof(str1.c_str());
-			V[j][1] = atof(str2.c_str());
-			V[j][2] = 0;
+		//	if(j==1)
+		//	{
+		//		double x[3]={1,2,3};
+		//		V[j]=x;
+		//	}
+			//if(j==0)
+			//{
+		//		double x[3]={0,1,1};
+		//		V[j]=x;
+		//	}
+			double a = atof(str1.c_str());
+			double b = atof(str2.c_str());
+			double c = 0;
+			double x[3] = {a, b, c};
+			cout<<a<<b<<c;
+			cout<<"x"<<x<<endl;
+			V[j]=x;
+			//V[j][0] = atof(str1.c_str());
+			//V[j][1] = atof(str2.c_str());
+			//V[j][2] = 0;
+			//V[j] = [atof(str1.c_str()), atof(str2.c_str()), 0];
+			cout<<V[0]<<endl;
+			cout<<V[1]<<endl;
+			cout<<V[2]<<endl;
 			//V[i][2] represents which cluster a point is involved in
 		}
 
@@ -72,26 +117,28 @@ int main()
 			}
 		
 			//Setting Cluster for each points / Multiprocess
-			int status;
 			pid_t pid = fork();
-
 			if(pid<0)
 			{
 				//failed to fork
+				exit(EXIT_FAILURE);
 			}
 
 			else if(pid==0)
 			{
 				//child process
 				fcalDistance(NULL);
-				exit(0);
+				kill(getpid(), SIGTERM);
 			}
 			
 			else
 			{
 				//parent process
 				bcalDistance(NULL);
-				wait(&status);
+				int status;
+				waitpid(pid,&status,0);
+				shmdt(V);
+		//		munmap(V, pointnum*3);
 			}
 
 			//Rearranging Clusters' centers
@@ -144,6 +191,7 @@ void* fcalDistance(void *unused)
 			{
 				min = distance;
 				V[i][2] = j;
+				//cout<<j<<endl;
 			}
 		}	
 	}

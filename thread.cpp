@@ -125,6 +125,7 @@ int main()
 
 void* fcalDistance(void *unused)
 {
+	cout<<"c";
 	for(int i=0; i<pointnum/2; i++)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};
@@ -145,6 +146,7 @@ void* fcalDistance(void *unused)
 
 void* bcalDistance(void *unused)
 { 
+	cout<<"p";
 	for(int i=pointnum/2; i<pointnum; i++)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};
