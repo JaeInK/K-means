@@ -5,6 +5,8 @@
 #include <cmath>
 #include <ctime>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 using namespace std;
 
@@ -66,27 +68,27 @@ int main()
 			}
 		
 			//Setting Cluster for each points / Multiprocess
-			pid_t pid;
-			pid = fork();
-			switch(pid)
+			int status;
+			pid_t pid =fork();
+			
+			if(pid<0)
 			{
-				case -1:
-				{
-					//failed to fork
-				}
-				case 0:
-				{
-					//child process
-					fcalDistance(&V);
-				}
-				default:
-				{
-					//parent process
-					bcalDistance(&V);
-				}
-
+				//failed to fork
 			}
-			//child process 만들어지고 끝까지 돌아가는게 아니라 여기서 끝나게 해야 하고. 이걸 parent는 기다려야 한다.
+
+			else if(pid==0)
+			{
+				//child process
+				fcalDistance(&V);
+				exit(0);
+			}
+		
+			else
+			{
+				//parent process
+				bcalDistance(&V);
+				wait(&status);
+			}
 
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
@@ -165,3 +167,6 @@ void* bcalDistance(void* data)
 	}
 	return NULL;
 }
+
+
+
