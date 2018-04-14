@@ -10,19 +10,21 @@
 #include <sys/mman.h>
 
 using namespace std;
-
-double **V;
+vector< vector<double> > *v = new vector< vector<double> >;
+vector< vector<double> > &V = *v;
 vector< vector<double> > center;
-void* fcalDistance(void *);
-void* bcalDistance(void *);
-int pointnum;
+void* fcalDistance(void* data);
+void* bcalDistance(void* data);
 
 int main()
-{	
+{
+	//share memory
+	*v = mmap(NULL, sizeof(v), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 	//read input		
 	int testnum;
 	int repeatnum;
 	int clusternum;
+	int pointnum;
 	string str1;
 	string str2;
 
@@ -40,20 +42,18 @@ int main()
 		cout<<clusternum;
 		cin >> pointnum;
 		cout<<pointnum<<' ';
-		V = new double*[pointnum];
-		for(int i=0; i<pointnum; i++)
-		{
-			V[i]= new double[3];
-		}
+		vector<double> tmp;
 
 		for(int j=0; j<pointnum; j++)
 		{
 			cin>>str1;
 			cin>>str2;
-			V[j][0] = atof(str1.c_str());
-			V[j][1] = atof(str2.c_str());
-			V[j][2] = 0;
+			tmp.push_back(atof(str1.c_str()));
+			tmp.push_back(atof(str2.c_str()));
+			tmp.push_back(0);
 			//V[i][2] represents which cluster a point is involved in
+			V.push_back(tmp);
+			tmp.clear();
 		}
 
 		//K-Means-Clustering
@@ -63,7 +63,6 @@ int main()
 			{
 				for(int j=0; j<clusternum; j++)
 				{
-					vector< double > tmp;
 					tmp.push_back(V[j][0]);
 					tmp.push_back(V[j][1]);
 					center.push_back(tmp);
@@ -73,8 +72,8 @@ int main()
 		
 			//Setting Cluster for each points / Multiprocess
 			int status;
-			pid_t pid = fork();
-
+			pid_t pid =fork();
+			
 			if(pid<0)
 			{
 				//failed to fork
@@ -83,15 +82,16 @@ int main()
 			else if(pid==0)
 			{
 				//child process
-				fcalDistance(NULL);
+				fcalDistance(v);
 				exit(0);
 			}
-			
+		
 			else
 			{
 				//parent process
-				bcalDistance(NULL);
+				bcalDistance(v);
 				wait(&status);
+				//munmap(v, sizeof *v);
 			}
 
 			//Rearranging Clusters' centers
@@ -124,17 +124,18 @@ int main()
 		}
 		cout<<endl;
 
-		delete[] V;
+		V.clear();
 		center.clear();
 	}
 }
 
 
-void* fcalDistance(void *unused)
+void* fcalDistance(void* data)
 {
-	for(int i=0; i<pointnum/2; i++)
+	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
+	for(int i=0; i<point.size()/2; i++)
 	{
-		double apoint[2] = {V[i][0], V[i][1]};
+		double apoint[2] = {point[i][0], point[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
 		V[i][2]=0;
 		for(int j=1; j<center.size(); j++)
@@ -150,11 +151,12 @@ void* fcalDistance(void *unused)
 	return NULL;
 }
 
-void* bcalDistance(void *unused)
-{ 
-	for(int i=pointnum/2; i<pointnum; i++)
+void* bcalDistance(void* data)
+{
+	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
+	for(int i=point.size()/2; i<point.size(); i++)
 	{
-		double apoint[2] = {V[i][0], V[i][1]};
+		double apoint[2] = {point[i][0], point[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
 		V[i][2]=0;
 		for(int j=1; j<center.size(); j++)

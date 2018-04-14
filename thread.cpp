@@ -8,10 +8,11 @@
 
 using namespace std;
 
-vector< vector<double> > V;
+double **V;
 vector< vector<double> > center;
-void* fcalDistance(void* data);
-void* bcalDistance(void* data);
+void* fcalDistance(void *);
+void* bcalDistance(void *);
+int pointnum;
 
 int main()
 {
@@ -19,7 +20,6 @@ int main()
 	int testnum;
 	int repeatnum;
 	int clusternum;
-	int pointnum;
 	string str1;
 	string str2;
 
@@ -37,18 +37,20 @@ int main()
 		cout<<clusternum;
 		cin >> pointnum;
 		cout<<pointnum<<' ';
-		vector<double> tmp;
+		V = new double*[pointnum];
+		for(int i=0; i<pointnum; i++)
+		{
+			V[i]= new double[3];
+		}
 
 		for(int j=0; j<pointnum; j++)
 		{
 			cin>>str1;
 			cin>>str2;
-			tmp.push_back(atof(str1.c_str()));
-			tmp.push_back(atof(str2.c_str()));
-			tmp.push_back(0);
+			V[j][0] = atof(str1.c_str());
+			V[j][1] = atof(str2.c_str());
+			V[j][2] = 0;
 			//V[i][2] represents which cluster a point is involved in
-			V.push_back(tmp);
-			tmp.clear();
 		}
 
 		//K-Means-Clustering
@@ -58,6 +60,7 @@ int main()
 			{
 				for(int j=0; j<clusternum; j++)
 				{
+					vector< double > tmp;
 					tmp.push_back(V[j][0]);
 					tmp.push_back(V[j][1]);
 					center.push_back(tmp);
@@ -69,13 +72,13 @@ int main()
 			pthread_t thread[2];
 			int thr_id;
 			int status;
-			thr_id = pthread_create(&thread[0], NULL, fcalDistance, &V);
+			thr_id = pthread_create(&thread[0], NULL, fcalDistance, NULL);
     		if (thr_id < 0)
     		{
         		perror("thread create error : ");
         		exit(0);
     		}	
-			thr_id = pthread_create(&thread[1], NULL, bcalDistance, &V);
+			thr_id = pthread_create(&thread[1], NULL, bcalDistance, NULL);
 			if (thr_id < 0)
 			{
 				perror("thread create error : ");
@@ -114,18 +117,17 @@ int main()
 		}
 		cout<<endl;
 
-		V.clear();
+		delete[] V;
 		center.clear();
 	}
 }
 
 
-void* fcalDistance(void* data)
+void* fcalDistance(void *unused)
 {
-	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
-	for(int i=0; i<point.size()/2; i++)
+	for(int i=0; i<pointnum/2; i++)
 	{
-		double apoint[2] = {point[i][0], point[i][1]};
+		double apoint[2] = {V[i][0], V[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
 		V[i][2]=0;
 		for(int j=1; j<center.size(); j++)
@@ -141,12 +143,11 @@ void* fcalDistance(void* data)
 	return NULL;
 }
 
-void* bcalDistance(void* data)
-{
-	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
-	for(int i=point.size()/2; i<point.size(); i++)
+void* bcalDistance(void *unused)
+{ 
+	for(int i=pointnum/2; i<pointnum; i++)
 	{
-		double apoint[2] = {point[i][0], point[i][1]};
+		double apoint[2] = {V[i][0], V[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
 		V[i][2]=0;
 		for(int j=1; j<center.size(); j++)

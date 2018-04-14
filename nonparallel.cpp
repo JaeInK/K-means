@@ -9,7 +9,7 @@ using namespace std;
 
 double **V;
 vector< vector<double> > center;
-void* calDistance();
+void* calDistance(void *);
 int pointnum;
 
 int main()
@@ -40,13 +40,11 @@ int main()
 		{
 			V[i] = new double[3];
 		}
-		cout<<pointnum;
-		cout<<sizeof V;
+		
 		for(int j=0; j<pointnum; j++)
 		{
 			cin>>str1;
 			cin>>str2;
-			//double tmp[3] = {atof(str1.c_str()),atof(str2.c_str()),0};
 			V[j][0] = atof(str1.c_str());
 			V[j][1] = atof(str2.c_str());
 			V[j][2] = 0;
@@ -69,7 +67,7 @@ int main()
 			}
 		
 			//Setting Cluster for each points
-			calDistance();
+			calDistance(NULL);
 		
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
@@ -110,7 +108,7 @@ int main()
 }
 
 
-void* calDistance()
+void* calDistance(void *unused)
 {
 	for(int i=0; i<pointnum; i++)
 	{
