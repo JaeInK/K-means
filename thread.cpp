@@ -123,7 +123,7 @@ int main()
 void* fcalDistance(void* data)
 {
 	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
-	for(int i=0; i<point.size(); i++)
+	for(int i=0; i<point.size()/2; i++)
 	{
 		double apoint[2] = {point[i][0], point[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);

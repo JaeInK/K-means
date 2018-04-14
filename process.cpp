@@ -10,7 +10,8 @@ using namespace std;
 
 vector< vector<double> > V;
 vector< vector<double> > center;
-void* calDistance(void* data);
+void* fcalDistance(void* data);
+void* bcalDistance(void* data);
 
 int main()
 {
@@ -66,26 +67,27 @@ int main()
 		
 			//Setting Cluster for each points / Multiprocess
 			pid_t pid;
-			cout<<"fork child process"<<endl;
 			pid = fork();
 			switch(pid)
 			{
 				case -1:
 				{
-					cout<<"Failed to fork"<<endl;
+					//failed to fork
 				}
 				case 0:
 				{
-					cout<<"I am child process"<<endl;
+					//child process
+					fcalDistance(&V);
 				}
 				default:
 				{
-					cout<<"I am parent process"<<endl;
+					//parent process
+					bcalDistance(&V);
 				}
 
 			}
-			calDistance(&V);
-		
+			//child process 만들어지고 끝까지 돌아가는게 아니라 여기서 끝나게 해야 하고. 이걸 parent는 기다려야 한다.
+
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
 			{
@@ -122,10 +124,31 @@ int main()
 }
 
 
-void* calDistance(void* data)
+void* fcalDistance(void* data)
 {
 	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
-	for(int i=0; i<point.size(); i++)
+	for(int i=0; i<point.size()/2; i++)
+	{
+		double apoint[2] = {point[i][0], point[i][1]};
+		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
+		V[i][2]=0;
+		for(int j=1; j<center.size(); j++)
+		{
+			double distance = pow(apoint[0]-center[j][0], 2) + pow(apoint[1]-center[j][1], 2);
+			if(distance < min)
+			{
+				min = distance;
+				V[i][2] = j;
+			}
+		}	
+	}
+	return NULL;
+}
+
+void* bcalDistance(void* data)
+{
+	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
+	for(int i=point.size()/2; i<point.size(); i++)
 	{
 		double apoint[2] = {point[i][0], point[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
