@@ -7,16 +7,19 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/mman.h>
 
 using namespace std;
-
-vector< vector<double> > V;
+vector< vector<double> > *v = new vector< vector<double> >;
+vector< vector<double> > &V = *v;
 vector< vector<double> > center;
 void* fcalDistance(void* data);
 void* bcalDistance(void* data);
 
 int main()
 {
+	//share memory
+	*v = mmap(NULL, sizeof(v), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 	//read input		
 	int testnum;
 	int repeatnum;
@@ -79,15 +82,16 @@ int main()
 			else if(pid==0)
 			{
 				//child process
-				fcalDistance(&V);
+				fcalDistance(v);
 				exit(0);
 			}
 		
 			else
 			{
 				//parent process
-				bcalDistance(&V);
+				bcalDistance(v);
 				wait(&status);
+				//munmap(v, sizeof *v);
 			}
 
 			//Rearranging Clusters' centers
