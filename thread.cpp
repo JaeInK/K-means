@@ -10,7 +10,8 @@ using namespace std;
 
 vector< vector<double> > V;
 vector< vector<double> > center;
-void* calDistance(void* data);
+void* fcalDistance(void* data);
+void* bcalDistance(void* data);
 
 int main()
 {
@@ -65,16 +66,23 @@ int main()
 			}
 		
 			//Setting Cluster for each points / Multithread
-			pthread_t thread;
+			pthread_t thread[2];
 			int thr_id;
 			int status;
-			thr_id = pthread_create(&thread, NULL, calDistance, &V);
+			thr_id = pthread_create(&thread[0], NULL, fcalDistance, &V);
     		if (thr_id < 0)
     		{
         		perror("thread create error : ");
         		exit(0);
     		}	
-			pthread_join(thread, (void **)&status);
+			thr_id = pthread_create(&thread[1], NULL, bcalDistance, &V);
+			if (thr_id < 0)
+			{
+				perror("thread create error : ");
+				exit(0);
+			}
+			pthread_join(thread[0], (void **)&status);
+			pthread_join(thread[1], (void **)&status);
 
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
@@ -112,7 +120,7 @@ int main()
 }
 
 
-void* calDistance(void* data)
+void* fcalDistance(void* data)
 {
 	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
 	for(int i=0; i<point.size(); i++)
@@ -132,5 +140,27 @@ void* calDistance(void* data)
 	}
 	return NULL;
 }
+
+void* bcalDistance(void* data)
+{
+	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
+	for(int i=point.size()/2; i<point.size(); i++)
+	{
+		double apoint[2] = {point[i][0], point[i][1]};
+		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
+		V[i][2]=0;
+		for(int j=1; j<center.size(); j++)
+		{
+			double distance = pow(apoint[0]-center[j][0], 2) + pow(apoint[1]-center[j][1], 2);
+			if(distance < min)
+			{
+				min = distance;
+				V[i][2] = j;
+			}
+		}	
+	}
+	return NULL;
+}
+
 
 

@@ -9,8 +9,7 @@ using namespace std;
 
 vector< vector<double> > V;
 vector< vector<double> > center;
-vector<int> clus;
-void calDistance(vector< vector<double> > &data);
+void* calDistance(void* data);
 
 int main()
 {
@@ -44,7 +43,8 @@ int main()
 			cin>>str2;
 			tmp.push_back(atof(str1.c_str()));
 			tmp.push_back(atof(str2.c_str()));
-			clus.push_back(0);
+			tmp.push_back(0);
+			//V[i][2] represents which cluster a point is involved in
 			V.push_back(tmp);
 			tmp.clear();
 		}
@@ -64,8 +64,8 @@ int main()
 			}
 		
 			//Setting Cluster for each points
-			calDistance(V);
-
+			calDistance(&V);
+		
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
 			{
@@ -74,7 +74,7 @@ int main()
 				int num = 0;
 				for(int j=0; j<pointnum; j++)
 				{
-					if(clus[j] == i)
+					if(V[j][2] == i)
 					{
 						sumx = sumx + V[j][0];
 						sumy = sumy + V[j][1];
@@ -92,35 +92,35 @@ int main()
 		cout << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 		for(int k=0; k<pointnum; k++)
 		{
-			cout<<clus[k]<<endl;
+			cout<<V[k][2]<<endl;
 		}
 		cout<<endl;
 
 		V.clear();
 		center.clear();
-		clus.clear();
 	}
 }
 
 
-void calDistance(vector< vector<double> > &data)
+void* calDistance(void* data)
 {
-	for(int i=0; i<data.size(); i++)
+	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
+	for(int i=0; i<point.size(); i++)
 	{
-		double point[2] = {data[i][0], data[i][1]};
-		double min = pow(point[0]-center[0][0], 2) + pow(point[1]-center[0][1], 2);
-		clus[i]=0;
+		double apoint[2] = {point[i][0], point[i][1]};
+		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
+		V[i][2]=0;
 		for(int j=1; j<center.size(); j++)
 		{
-			double distance = pow(point[0]-center[j][0], 2) + pow(point[1]-center[j][1], 2);
+			double distance = pow(apoint[0]-center[j][0], 2) + pow(apoint[1]-center[j][1], 2);
 			if(distance < min)
 			{
 				min = distance;
-				clus[i] = j;
+				V[i][2] = j;
 			}
 		}	
 	}
-
+	return NULL;
 }
 
 
