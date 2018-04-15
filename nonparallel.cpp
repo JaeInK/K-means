@@ -22,18 +22,12 @@ int main()
 	string str1;
 	string str2;
 
-	cout<<"start";
 	cin >> testnum;
-	cout << testnum;
-	cout << "\n";
 	for(int t=0; t<testnum; t++)
 	{
 		int start_s=clock();
-		cout<<"repeat";
 		cin >> repeatnum;
-		cout<<repeatnum;
 		cin >> clusternum;
-		cout<<clusternum;
 		cin >> pointnum;
 		V = new double*[pointnum];
 		center = new double*[pointnum];

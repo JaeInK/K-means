@@ -24,20 +24,13 @@ int main()
 	string str1;
 	string str2;
 
-	cout<<"start";
 	cin >> testnum;
-	cout << testnum;
-	cout << "\n";
 	for(int t=0; t<testnum; t++)
 	{
 		int start_s=clock();
-		cout<<"repeat";
 		cin >> repeatnum;
-		cout<<repeatnum;
 		cin >> clusternum;
-		cout<<clusternum;
 		cin >> pointnum;
-		cout<<pointnum<<' ';
 		V = new double*[pointnum];
 		center = new double*[pointnum];
 		clus = new double[pointnum];
@@ -126,7 +119,6 @@ int main()
 
 void* fcalDistance(void *unused)
 {
-	cout<<"c";
 	for(int i=0; i<pointnum/2; i++)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};
@@ -147,7 +139,6 @@ void* fcalDistance(void *unused)
 
 void* bcalDistance(void *unused)
 { 
-	cout<<"p";
 	for(int i=pointnum/2; i<pointnum; i++)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};
