@@ -80,10 +80,10 @@ int main()
 			}
 		
 			//Setting Cluster for each points / Multiprocess
-			int start_proc = clock();
+			//int start_proc = clock();
 			pid_t pid =fork();
-			int stop_proc = clock();
-			cout <<"process "<< (stop_proc-start_proc)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
+			//int stop_proc = clock();
+			//cout <<"process "<< (stop_proc-start_proc)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 				
 			if(pid<0)
 			{
@@ -129,15 +129,14 @@ int main()
 		//Printing output
 		int stop_s=clock();
 		cout<<"Test Case #"<<t<<endl;
-		cout<< "repeat: "<<repeatnum<<endl;
-		cout<< "cluster: "<<clusternum<<endl;
-		cout<< "pointnum: "<<pointnum<<endl;
+		//cout<< "repeat: "<<repeatnum<<endl;
+		//cout<< "cluster: "<<clusternum<<endl;
+		//cout<< "pointnum: "<<pointnum<<endl;
 		cout << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 		for(int k=0; k<pointnum; k++)
 		{
-			//cout<<clus[k]<<endl;
+			cout<<clus[k]<<endl;
 		}
-		//cout<<endl;
 
 		delete[] V;
 		delete[] center;

@@ -15,7 +15,7 @@ void* fcalDistance(void *);
 void* bcalDistance(void *);
 int pointnum;
 int clusternum;
-int start_thread;
+//int start_thread;
 
 int main()
 {
@@ -68,8 +68,8 @@ int main()
 			pthread_t thread[2];//using two thread
 			int thr_id;
 			int status;
-			start_thread = clock();
-			cout<<"\n";
+			//start_thread = clock();
+			//cout<<"\n";
 			thr_id = pthread_create(&thread[0], NULL, fcalDistance, NULL);
     		if (thr_id < 0)
     		{
@@ -108,15 +108,14 @@ int main()
 		//Printing output
 		int stop_s=clock();
 		cout<<"Test Case #"<<t<<endl;
-		cout<< "repeat: "<<repeatnum<<endl;
-		cout<< "cluster: "<<clusternum<<endl;
-		cout<< "pointnum: "<<pointnum<<endl;
+		//cout<< "repeat: "<<repeatnum<<endl;
+		//cout<< "cluster: "<<clusternum<<endl;
+		//cout<< "pointnum: "<<pointnum<<endl;
 		cout << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 		for(int k=0; k<pointnum; k++)
 		{
-			//cout<<clus[k]<<endl;
+			cout<<clus[k]<<endl;
 		}
-		//cout<<endl;
 
 		delete[] V;
 		delete[] center;
@@ -126,9 +125,9 @@ int main()
 
 void* fcalDistance(void *unused)//calculate front part of points
 {
-	int stop_thread = clock();
-	cout<<"\n";
-	cout <<"thread"<< (stop_thread-start_thread)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
+	//int stop_thread = clock();
+	//cout<<"\n";
+	//cout <<"thread"<< (stop_thread-start_thread)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 	for(int i=0; i<pointnum/2; i++)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};

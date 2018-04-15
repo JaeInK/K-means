@@ -86,15 +86,14 @@ int main()
 		//Printing output
 		int stop_s=clock();
 		cout<<"Test Case #"<<t<<endl;
-		cout<< "repeat: "<<repeatnum<<endl;
-		cout<< "cluster: "<<clusternum<<endl;
-		cout<< "pointnum: "<<pointnum<<endl;
+		//cout<< "repeat: "<<repeatnum<<endl;
+		//cout<< "cluster: "<<clusternum<<endl;
+		//cout<< "pointnum: "<<pointnum<<endl;
 		cout << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 		for(int k=0; k<pointnum; k++)
 		{
-			//cout<<clus[k]<<endl;
+			cout<<clus[k]<<endl;
 		}
-		//cout<<endl;
 		
 		delete[] V;
 	}

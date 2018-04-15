@@ -1,12 +1,12 @@
-all: nonparallel.out thread.out process.out
+all: nonparallel thread process
 
-nonparallel.out: nonparallel.cpp
+nonparallel: nonparallel.cpp
 	clang++-3.8 -o nonparallel nonparallel.cpp 
   
-thread.out: thread.cpp
+thread: thread.cpp
 	clang++-3.8 -o thread thread.cpp -lpthread
  
-process.out: process.cpp
+process: process.cpp
 	clang++-3.8 -o process process.cpp
 
 clean:
