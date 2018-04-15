@@ -80,7 +80,11 @@ int main()
 			}
 		
 			//Setting Cluster for each points / Multiprocess
+			int start_proc = clock();
 			pid_t pid =fork();
+			int stop_proc = clock();
+			cout <<"process "<< (stop_proc-start_proc)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
+				
 			if(pid<0)
 			{
 				//failed to fork
