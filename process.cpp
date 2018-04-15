@@ -38,8 +38,8 @@ int main()
 		cin >> repeatnum;
 		cin >> clusternum;
 		cin >> pointnum;
-		V = new double*[pointnum];
-		center = new double*[pointnum];		
+		V = new double*[pointnum];//V has all points
+		center = new double*[pointnum];//center has all clusters' center	
 
 		//share data clus
 		int shmid;
@@ -125,12 +125,15 @@ int main()
 		//Printing output
 		int stop_s=clock();
 		cout<<"Test Case #"<<t<<endl;
+		cout<< "repeat: "<<repeatnum<<endl;
+		cout<< "cluster: "<<clusternum<<endl;
+		cout<< "pointnum: "<<pointnum<<endl;
 		cout << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 		for(int k=0; k<pointnum; k++)
 		{
-			cout<<clus[k]<<endl;
+			//cout<<clus[k]<<endl;
 		}
-		cout<<endl;
+		//cout<<endl;
 
 		delete[] V;
 		delete[] center;
@@ -138,7 +141,7 @@ int main()
 }
 
 
-void* fcalDistance(void *unused)
+void* fcalDistance(void *unused)//calcuate front part of points
 {
 	for(int i=0; i<pointnum/2; i++)
 	{
@@ -158,7 +161,7 @@ void* fcalDistance(void *unused)
 	return NULL;
 }
 
-void* bcalDistance(void *unused)
+void* bcalDistance(void *unused)//calculate back part of points
 { 
 	for(int i=pointnum/2; i<pointnum; i++)
 	{

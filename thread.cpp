@@ -27,12 +27,13 @@ int main()
 	cin >> testnum;
 	for(int t=0; t<testnum; t++)
 	{
+		//initialize
 		int start_s=clock();
 		cin >> repeatnum;
 		cin >> clusternum;
 		cin >> pointnum;
-		V = new double*[pointnum];
-		center = new double*[pointnum];
+		V = new double*[pointnum];//V has all points
+		center = new double*[pointnum];//center has all clusters' center
 		clus = new double[pointnum];
 		for(int i=0; i<pointnum; i++)
 		{
@@ -63,7 +64,7 @@ int main()
 			}
 		
 			//Setting Cluster for each points / Multithread
-			pthread_t thread[2];
+			pthread_t thread[2];//using two thread
 			int thr_id;
 			int status;
 			thr_id = pthread_create(&thread[0], NULL, fcalDistance, NULL);
@@ -78,7 +79,7 @@ int main()
 				perror("thread create error : ");
 				exit(0);
 			}
-			pthread_join(thread[0], (void **)&status);
+			pthread_join(thread[0], (void **)&status); //for synchronization
 			pthread_join(thread[1], (void **)&status);
 
 			//Rearranging Clusters' centers
@@ -104,12 +105,15 @@ int main()
 		//Printing output
 		int stop_s=clock();
 		cout<<"Test Case #"<<t<<endl;
+		cout<< "repeat: "<<repeatnum<<endl;
+		cout<< "cluster: "<<clusternum<<endl;
+		cout<< "pointnum: "<<pointnum<<endl;
 		cout << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 		for(int k=0; k<pointnum; k++)
 		{
-			cout<<clus[k]<<endl;
+			//cout<<clus[k]<<endl;
 		}
-		cout<<endl;
+		//cout<<endl;
 
 		delete[] V;
 		delete[] center;
@@ -117,7 +121,7 @@ int main()
 }
 
 
-void* fcalDistance(void *unused)
+void* fcalDistance(void *unused)//calculate front part of points
 {
 	for(int i=0; i<pointnum/2; i++)
 	{
@@ -134,10 +138,11 @@ void* fcalDistance(void *unused)
 			}
 		}	
 	}
+	pthread_exit(NULL);
 	return NULL;
 }
 
-void* bcalDistance(void *unused)
+void* bcalDistance(void *unused)//calculate back part of points
 { 
 	for(int i=pointnum/2; i<pointnum; i++)
 	{
@@ -154,5 +159,6 @@ void* bcalDistance(void *unused)
 			}
 		}	
 	}
+	pthread_exit(NULL);
 	return NULL;
 }

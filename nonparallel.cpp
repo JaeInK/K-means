@@ -25,12 +25,13 @@ int main()
 	cin >> testnum;
 	for(int t=0; t<testnum; t++)
 	{
+		//initialize
 		int start_s=clock();
 		cin >> repeatnum;
 		cin >> clusternum;
 		cin >> pointnum;
-		V = new double*[pointnum];
-		center = new double*[pointnum];
+		V = new double*[pointnum];//V has all points 
+		center = new double*[pointnum];//center has all clusters' center
 		clus = new double[pointnum];
 		for(int i=0; i<pointnum; i++)
 		{
@@ -85,19 +86,22 @@ int main()
 		//Printing output
 		int stop_s=clock();
 		cout<<"Test Case #"<<t<<endl;
+		cout<< "repeat: "<<repeatnum<<endl;
+		cout<< "cluster: "<<clusternum<<endl;
+		cout<< "pointnum: "<<pointnum<<endl;
 		cout << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 		for(int k=0; k<pointnum; k++)
 		{
-			cout<<clus[k]<<endl;
+			//cout<<clus[k]<<endl;
 		}
-		cout<<endl;
+		//cout<<endl;
 		
 		delete[] V;
 	}
 }
 
 
-void* calDistance(void *unused)
+void* calDistance(void *unused)//calculate distances from all clusters' center
 {
 	for(int i=0; i<pointnum; i++)
 	{
@@ -111,7 +115,6 @@ void* calDistance(void *unused)
 			if(distance < min)
 			{
 				min = distance;
-				//V[i][2] = j;
 				clus[i]=j;
 			}
 		}	
