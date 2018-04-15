@@ -9,10 +9,12 @@
 using namespace std;
 
 double **V;
-vector< vector<double> > center;
+double *clus;
+double **center;
 void* fcalDistance(void *);
 void* bcalDistance(void *);
 int pointnum;
+int clusternum;
 
 int main()
 {
@@ -38,9 +40,12 @@ int main()
 		cin >> pointnum;
 		cout<<pointnum<<' ';
 		V = new double*[pointnum];
+		center = new double*[pointnum];
+		clus = new double[pointnum];
 		for(int i=0; i<pointnum; i++)
 		{
 			V[i]= new double[3];
+			center[i] = new double[2];
 		}
 
 		for(int j=0; j<pointnum; j++)
@@ -50,6 +55,7 @@ int main()
 			V[j][0] = atof(str1.c_str());
 			V[j][1] = atof(str2.c_str());
 			V[j][2] = 0;
+			clus[j] = 0;
 			//V[i][2] represents which cluster a point is involved in
 		}
 
@@ -60,11 +66,8 @@ int main()
 			{
 				for(int j=0; j<clusternum; j++)
 				{
-					vector< double > tmp;
-					tmp.push_back(V[j][0]);
-					tmp.push_back(V[j][1]);
-					center.push_back(tmp);
-					tmp.clear();
+					center[j][0] = V[j][0];
+					center[j][1] = V[j][1];
 				}
 			}
 		
@@ -113,12 +116,12 @@ int main()
 		cout << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 		for(int k=0; k<pointnum; k++)
 		{
-			cout<<V[k][2]<<endl;
+			cout<<clus[k]<<endl;
 		}
 		cout<<endl;
 
 		delete[] V;
-		center.clear();
+		delete[] center;
 	}
 }
 
@@ -130,14 +133,16 @@ void* fcalDistance(void *unused)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
-		V[i][2]=0;
-		for(int j=1; j<center.size(); j++)
+		//V[i][2]=0;
+		clus[i]=0;
+		for(int j=1; j<clusternum; j++)
 		{
 			double distance = pow(apoint[0]-center[j][0], 2) + pow(apoint[1]-center[j][1], 2);
 			if(distance < min)
 			{
 				min = distance;
 				V[i][2] = j;
+				clus[i] = j;
 			}
 		}	
 	}
@@ -151,14 +156,15 @@ void* bcalDistance(void *unused)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
-		V[i][2]=0;
-		for(int j=1; j<center.size(); j++)
+		clus[i]=0;
+		for(int j=1; j<clusternum; j++)
 		{
 			double distance = pow(apoint[0]-center[j][0], 2) + pow(apoint[1]-center[j][1], 2);
 			if(distance < min)
 			{
 				min = distance;
 				V[i][2] = j;
+				clus[i] = j;
 			}
 		}	
 	}

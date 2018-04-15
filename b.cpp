@@ -8,23 +8,27 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/shm.h>
+
 
 using namespace std;
-vector< vector<double> > *v = new vector< vector<double> >;
-vector< vector<double> > &V = *v;
+
+double **V;
+double *clus;
 vector< vector<double> > center;
-void* fcalDistance(void* data);
-void* bcalDistance(void* data);
+void* fcalDistance(void *);
+void* bcalDistance(void *);
+int pointnum;
 
 int main()
 {
-	//share memory
-	*v = mmap(NULL, sizeof(v), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 	//read input		
 	int testnum;
 	int repeatnum;
 	int clusternum;
-	int pointnum;
 	string str1;
 	string str2;
 
@@ -42,18 +46,30 @@ int main()
 		cout<<clusternum;
 		cin >> pointnum;
 		cout<<pointnum<<' ';
-		vector<double> tmp;
+		V = new double*[pointnum];
+		//share data clus
+		int shmid;
+		shmid = shmget(IPC_PRIVATE, pointnum*sizeof(double), S_IRUSR | S_IWUSR);
+		if(shmid ==-1)
+		{
+			cout<<"Shmget ERROR \n";
+			exit(1);
+		}
+		clus = (double *)shmat(shmid, NULL, 0);
+		for(int i=0; i<pointnum; i++)
+		{
+			V[i]= new double[3];
+		}
 
 		for(int j=0; j<pointnum; j++)
 		{
 			cin>>str1;
 			cin>>str2;
-			tmp.push_back(atof(str1.c_str()));
-			tmp.push_back(atof(str2.c_str()));
-			tmp.push_back(0);
+			V[j][0] = atof(str1.c_str());
+			V[j][1] = atof(str2.c_str());
+			V[j][2] = 0;
+			//clus[j] = 0;
 			//V[i][2] represents which cluster a point is involved in
-			V.push_back(tmp);
-			tmp.clear();
 		}
 
 		//K-Means-Clustering
@@ -63,6 +79,7 @@ int main()
 			{
 				for(int j=0; j<clusternum; j++)
 				{
+					vector< double > tmp;
 					tmp.push_back(V[j][0]);
 					tmp.push_back(V[j][1]);
 					center.push_back(tmp);
@@ -71,29 +88,27 @@ int main()
 			}
 		
 			//Setting Cluster for each points / Multiprocess
-			int status;
 			pid_t pid =fork();
-			
 			if(pid<0)
 			{
 				//failed to fork
+				exit(EXIT_FAILURE);
 			}
-
+			
 			else if(pid==0)
 			{
 				//child process
-				fcalDistance(v);
-				exit(0);
+				fcalDistance(NULL);
+				kill(getpid(), SIGTERM);
 			}
-		
+			
 			else
 			{
 				//parent process
-				bcalDistance(v);
-				wait(&status);
-				//munmap(v, sizeof *v);
+				bcalDistance(NULL);
+				int status;
+				waitpid(pid, &status, 0);
 			}
-
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
 			{
@@ -120,24 +135,25 @@ int main()
 		cout << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000000 << " microseconds"<<endl;
 		for(int k=0; k<pointnum; k++)
 		{
-			cout<<V[k][2]<<endl;
+			cout<<clus[k]<<endl;
 		}
 		cout<<endl;
 
-		V.clear();
+		delete[] V;
 		center.clear();
 	}
 }
 
 
-void* fcalDistance(void* data)
+void* fcalDistance(void *unused)
 {
-	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
-	for(int i=0; i<point.size()/2; i++)
+	cout<<"c\n";
+	for(int i=0; i<pointnum/2; i++)
 	{
-		double apoint[2] = {point[i][0], point[i][1]};
+		double apoint[2] = {V[i][0], V[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
-		V[i][2]=0;
+		//V[i][2]=0;
+		clus[i]=0;
 		for(int j=1; j<center.size(); j++)
 		{
 			double distance = pow(apoint[0]-center[j][0], 2) + pow(apoint[1]-center[j][1], 2);
@@ -145,20 +161,21 @@ void* fcalDistance(void* data)
 			{
 				min = distance;
 				V[i][2] = j;
+				clus[i] = j;
 			}
 		}	
 	}
 	return NULL;
 }
 
-void* bcalDistance(void* data)
-{
-	vector< vector<double> >& point = *reinterpret_cast<vector <vector<double> >*>(data); 
-	for(int i=point.size()/2; i<point.size(); i++)
+void* bcalDistance(void *unused)
+{ 
+	cout<<"p\n";
+	for(int i=pointnum/2; i<pointnum; i++)
 	{
-		double apoint[2] = {point[i][0], point[i][1]};
+		double apoint[2] = {V[i][0], V[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
-		V[i][2]=0;
+		clus[i]=0;
 		for(int j=1; j<center.size(); j++)
 		{
 			double distance = pow(apoint[0]-center[j][0], 2) + pow(apoint[1]-center[j][1], 2);
@@ -166,6 +183,7 @@ void* bcalDistance(void* data)
 			{
 				min = distance;
 				V[i][2] = j;
+				clus[i] = j;
 			}
 		}	
 	}
