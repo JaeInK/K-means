@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <cmath>
 #include <ctime>
-#include <pthread.h>
 
 using namespace std;
 
@@ -13,8 +12,8 @@ double *clus;
 double **center;
 void* fcalDistance(void *);
 void* bcalDistance(void *);
-int pointnum;
 int clusternum;
+int pointnum;
 
 int main()
 {
@@ -37,23 +36,22 @@ int main()
 		cin >> clusternum;
 		cout<<clusternum;
 		cin >> pointnum;
-		cout<<pointnum<<' ';
 		V = new double*[pointnum];
 		center = new double*[pointnum];
 		clus = new double[pointnum];
 		for(int i=0; i<pointnum; i++)
 		{
-			V[i]= new double[2];
+			V[i] = new double[3];
 			center[i] = new double[2];
 		}
-
+		
 		for(int j=0; j<pointnum; j++)
 		{
 			cin>>str1;
 			cin>>str2;
 			V[j][0] = atof(str1.c_str());
 			V[j][1] = atof(str2.c_str());
-			clus[j] = 0;
+			clus[j]=0;
 			//clus represents which cluster a point is involved in
 		}
 
@@ -69,24 +67,8 @@ int main()
 				}
 			}
 		
-			//Setting Cluster for each points / Multithread
-			pthread_t thread[2];
-			int thr_id;
-			int status;
-			thr_id = pthread_create(&thread[0], NULL, fcalDistance, NULL);
-    		if (thr_id < 0)
-    		{
-        		perror("thread create error : ");
-        		exit(0);
-    		}	
-			thr_id = pthread_create(&thread[1], NULL, bcalDistance, NULL);
-			if (thr_id < 0)
-			{
-				perror("thread create error : ");
-				exit(0);
-			}
-			pthread_join(thread[0], (void **)&status);
-			pthread_join(thread[1], (void **)&status);
+			//Setting Cluster for each points
+			calDistance(NULL);
 
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
@@ -107,7 +89,6 @@ int main()
 				center[i][1] = sumy/num;
 			}
 		}
-
 		//Printing output
 		int stop_s=clock();
 		cout<<"Test Case #"<<t<<endl;
@@ -117,51 +98,31 @@ int main()
 			cout<<clus[k]<<endl;
 		}
 		cout<<endl;
-
+		
 		delete[] V;
-		delete[] center;
 	}
 }
 
 
-void* fcalDistance(void *unused)
+void* calDistance(void *unused)
 {
-	cout<<"c";
-	for(int i=0; i<pointnum/2; i++)
+	for(int i=0; i<pointnum; i++)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};
 		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
 		clus[i]=0;
+		
 		for(int j=1; j<clusternum; j++)
 		{
 			double distance = pow(apoint[0]-center[j][0], 2) + pow(apoint[1]-center[j][1], 2);
 			if(distance < min)
 			{
 				min = distance;
-				clus[i] = j;
+				//V[i][2] = j;
+				clus[i]=j;
 			}
 		}	
 	}
 	return NULL;
 }
 
-void* bcalDistance(void *unused)
-{ 
-	cout<<"p";
-	for(int i=pointnum/2; i<pointnum; i++)
-	{
-		double apoint[2] = {V[i][0], V[i][1]};
-		double min = pow(apoint[0]-center[0][0], 2) + pow(apoint[1]-center[0][1], 2);
-		clus[i]=0;
-		for(int j=1; j<clusternum; j++)
-		{
-			double distance = pow(apoint[0]-center[j][0], 2) + pow(apoint[1]-center[j][1], 2);
-			if(distance < min)
-			{
-				min = distance;
-			 	clus[i] = j;
-			}
-		}	
-	}
-	return NULL;
-}

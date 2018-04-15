@@ -4,7 +4,14 @@
 #include <stdlib.h>
 #include <cmath>
 #include <ctime>
-#include <pthread.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/shm.h>
 
 using namespace std;
 
@@ -39,8 +46,18 @@ int main()
 		cin >> pointnum;
 		cout<<pointnum<<' ';
 		V = new double*[pointnum];
-		center = new double*[pointnum];
-		clus = new double[pointnum];
+		center = new double*[pointnum];		
+
+		//share data clus
+		int shmid;
+		shmid = shmget(IPC_PRIVATE, pointnum*sizeof(double), S_IRUSR | S_IWUSR);
+		if(shmid ==-1)
+		{
+			cout<<"Shmget ERROR \n";
+			exit(1);
+		}
+		clus = (double *)shmat(shmid, NULL, 0);
+
 		for(int i=0; i<pointnum; i++)
 		{
 			V[i]= new double[2];
@@ -69,25 +86,29 @@ int main()
 				}
 			}
 		
-			//Setting Cluster for each points / Multithread
-			pthread_t thread[2];
-			int thr_id;
-			int status;
-			thr_id = pthread_create(&thread[0], NULL, fcalDistance, NULL);
-    		if (thr_id < 0)
-    		{
-        		perror("thread create error : ");
-        		exit(0);
-    		}	
-			thr_id = pthread_create(&thread[1], NULL, bcalDistance, NULL);
-			if (thr_id < 0)
+			//Setting Cluster for each points / Multiprocess
+			pid_t pid =fork();
+			if(pid<0)
 			{
-				perror("thread create error : ");
-				exit(0);
+				//failed to fork
+				exit(EXIT_FAILURE);
 			}
-			pthread_join(thread[0], (void **)&status);
-			pthread_join(thread[1], (void **)&status);
-
+			
+			else if(pid==0)
+			{
+				//child process
+				fcalDistance(NULL);
+				kill(getpid(), SIGTERM);
+			}
+			
+			else
+			{
+				//parent process
+				bcalDistance(NULL);
+				int status;
+				waitpid(pid, &status, 0);
+			}
+			
 			//Rearranging Clusters' centers
 			for(int i=0; i<clusternum; i++)
 			{
@@ -126,7 +147,7 @@ int main()
 
 void* fcalDistance(void *unused)
 {
-	cout<<"c";
+	cout<<"c\n";
 	for(int i=0; i<pointnum/2; i++)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};
@@ -147,7 +168,7 @@ void* fcalDistance(void *unused)
 
 void* bcalDistance(void *unused)
 { 
-	cout<<"p";
+	cout<<"p\n";
 	for(int i=pointnum/2; i<pointnum; i++)
 	{
 		double apoint[2] = {V[i][0], V[i][1]};
